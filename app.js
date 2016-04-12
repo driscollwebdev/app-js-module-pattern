@@ -4,16 +4,22 @@ window.app = window.app || (function(app) {
     modules: {},
     dependencies: {},
     dependsUpon: function(name, path) {
-      if (!this.dependencies.hasOwnProperty(name)) {
-        this.dependencies[name] = path;
+      var scope = this;
+    	var promise = new Promise(function(resolve, reject){
+        if (!scope.dependencies.hasOwnProperty(name)) {
+          scope.dependencies[name] = path;
 
-        if (document) {
-          var script = document.createElement('script');
-          var source = (path.indexOf('http') == 0 || path.indexOf('//') == 0) ? path : appRoot + '/' + path;
-          script.src = source;
-          document.body.appendChild(script);
+          if (document) {
+            var script = document.createElement('script');
+            var source = (path.indexOf('http') == 0 || path.indexOf('//') == 0) ? path : appRoot + '/' + path;
+            script.src = source;
+            script.onload = resolve;
+            document.body.appendChild(script);
+          }
         }
-      }
+      });
+      
+      return promise;
     },
     extend: function(name, definition) {
       this.modules[name] = definition.call(this);
